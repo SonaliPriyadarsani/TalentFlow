@@ -5,6 +5,7 @@ import EditJob from "./EditJob";
 import ApplicationsPage from "./ApplicationsPage";
 import CompanyProfile from "./CompanyProfile";
 import "./RecruiterDashboard.css";
+import "./RecruiterDashboardLayout.css";
 
 function RecruiterDashboard({ user, onLogout }) {
 
@@ -146,6 +147,12 @@ function RecruiterDashboard({ user, onLogout }) {
   useEffect(() => {
     fetchJobs();
   }, []);
+  useEffect(() => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}, [activeSection]);
 
   const filteredJobs = jobs
     .filter((job) => {
@@ -488,38 +495,113 @@ function RecruiterDashboard({ user, onLogout }) {
   return (
 
     <div className="recruiter-dashboard">
-      <header className="navbar">
-        <h1>
-          TalentFlow
-        </h1>
+      
+<aside className="recruiter-sidebar">
+  <button
+    type="button"
+    className="recruiter-brand"
+    onClick={() => setActiveSection("overview")}
+    aria-label="Go to TalentFlow dashboard"
+  >
+    <span className="recruiter-brand-icon">T</span>
+    <span className="recruiter-brand-text">
+      <strong>TalentFlow</strong>
+      <small>HIRING MANAGEMENT</small>
+    </span>
+  </button>
 
-        <div className="navbar-right">
+  <div className="sidebar-workspace">
+    <span className="sidebar-section-label">WORKSPACE</span>
 
-          <span>
-            Welcome, {user?.name}
-          </span>
+    <button
+      type="button"
+      className={`sidebar-nav-item ${
+        activeSection === "overview" ? "active" : ""
+      }`}
+      onClick={() => setActiveSection("overview")}
+    >
+      <span className="sidebar-nav-icon">⌂</span>
+      <span>Overview</span>
+    </button>
 
-          <button
-            type="button"
-            onClick={onLogout}
-          >
-            Logout
-          </button>
+    <button
+      type="button"
+      className={`sidebar-nav-item ${
+        activeSection === "jobs" ? "active" : ""
+      }`}
+      onClick={() => setActiveSection("jobs")}
+    >
+      <span className="sidebar-nav-icon">▤</span>
+      <span>My Job Postings</span>
+      <span className="sidebar-nav-count">{totalJobs}</span>
+    </button>
 
-          <button
-            type="button"
-            className="nav-button"
-            onClick={() =>
-              setShowCompanyProfile(true)
-            }
-          >
-            Company Profile
-          </button>
+    <span className="sidebar-section-label sidebar-account-label">
+      ACCOUNT
+    </span>
 
-        </div>
+    <button
+      type="button"
+      className="sidebar-nav-item"
+      onClick={() => setShowCompanyProfile(true)}
+    >
+      <span className="sidebar-nav-icon">▦</span>
+      <span>Company Profile</span>
+    </button>
 
-      </header>
+    <button
+      type="button"
+      className={`sidebar-nav-item ${
+        activeSection === "password" ? "active" : ""
+      }`}
+      onClick={() => {
+        setActiveSection("password");
+        setPasswordMessage("");
+        setPasswordError("");
+      }}
+    >
+      <span className="sidebar-nav-icon">♙</span>
+      <span>Account Security</span>
+    </button>
+  </div>
 
+  <div className="sidebar-bottom">
+    <div className="sidebar-help-card">
+      <span className="sidebar-help-icon">✦</span>
+      <strong>TalentFlow Workspace</strong>
+      <p>Manage your hiring journey in one place.</p>
+    </div>
+
+    <button
+      type="button"
+      className="sidebar-logout-button"
+      onClick={onLogout}
+    >
+      <span className="sidebar-nav-icon">↪</span>
+      <span>Sign out</span>
+    </button>
+
+    <div className="sidebar-version">TALENTFLOW · RECRUITER PORTAL</div>
+  </div>
+</aside>
+
+<div className="recruiter-main">
+  <header className="recruiter-topbar">
+    <div className="topbar-context">
+      <span className="topbar-status-dot" />
+      <span>Recruiter workspace</span>
+    </div>
+
+    <div className="topbar-user">
+      <div className="topbar-avatar">
+        {String(user?.name || "R").trim().charAt(0).toUpperCase()}
+      </div>
+      <div className="topbar-user-details">
+        <strong>{user?.name || "Recruiter"}</strong>
+        <span>Recruiter account</span>
+      </div>
+    </div>
+  </header>
 
       <main className="jobs-container">
         {activeSection === "overview" && (
@@ -608,15 +690,10 @@ function RecruiterDashboard({ user, onLogout }) {
                   setShowCompanyProfile(true)
                 }
               >
-
-                <span className="quick-action-icon">
-                  🏢
-                </span>
-
                 <span className="quick-action-content">
 
                   <strong>
-                    Company Profile
+                    Company Profile<br></br>
                   </strong>
 
                   <small>
@@ -644,7 +721,7 @@ function RecruiterDashboard({ user, onLogout }) {
                 <span className="quick-action-content">
 
                   <strong>
-                    Change Password
+                    Change Password<br></br>
                   </strong>
 
                   <small>
@@ -671,9 +748,8 @@ function RecruiterDashboard({ user, onLogout }) {
                 <span className="quick-action-content">
 
                   <strong>
-                    My Job Postings
+                    My Job Postings<br></br>
                   </strong>
-
                   <small>
                     View and manage {totalJobs} job
                     {totalJobs !== 1
@@ -1283,17 +1359,27 @@ function RecruiterDashboard({ user, onLogout }) {
 
                     </div>
 
-                    <div className="job-skills-section">
+                    
+<div className="job-skills-section">
+  <strong className="job-section-label">Required Skills</strong>
 
-                      <strong>
-                        Skills
-                      </strong>
+  <div className="job-skill-tags">
+    {String(job.skills || "")
+      .split(/[,|]/)
+      .map((skill) => skill.trim())
+      .filter(Boolean)
+      .map((skill, index) => (
+        <span className="job-skill-tag" key={`${skill}-${index}`}>
+          {skill}
+        </span>
+      ))}
 
-                      <p>
-                        {job.skills}
-                      </p>
+    {!String(job.skills || "").trim() && (
+      <span className="job-skills-empty">No skills specified</span>
+    )}
+  </div>
+</div>
 
-                    </div>
 
                     <div className="job-description">
 
@@ -1356,6 +1442,7 @@ function RecruiterDashboard({ user, onLogout }) {
           </section>
         )}
       </main>
+    </div>
     </div>
   );
 }
